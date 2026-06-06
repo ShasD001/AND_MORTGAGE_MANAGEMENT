@@ -20,5 +20,17 @@ def init_db():
             password_hash TEXT NOT NULL
         );
     """)
+    # Creating mortgages table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS mortgages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            bank_name TEXT NOT NULL,
+            rate REAL NOT NULL,
+            term_years INTEGER NOT NULL,
+            amount REAL NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+    """)
     conn.commit()
     conn.close()
