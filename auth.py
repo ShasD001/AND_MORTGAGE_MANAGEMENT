@@ -30,3 +30,24 @@ def register():
 
     return render_template("register.html", form=form)
 
+
+@auth_bp.route("/login", methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = ?", (form.email.data,))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user and check_password_hash(user["password_hash"], form.password.data):
+            # Here you would log the user in (Flask-Login or your own session)
+            # For now, just flash a message
+            flash("Logged in successfully.", "success")
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Invalid credentials.", "danger")
+
+    return render_template("login.html", form=form)
+
