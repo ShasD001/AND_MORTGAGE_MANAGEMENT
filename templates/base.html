@@ -6,6 +6,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="{{ url_for('index') }}" class="logo">MortgageApp</a>
+        </div>
+        <div class="nav-right">
+           <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
+            <a href="{{ url_for('mortgages.mortgages') }}">Live Rates</a>  
+            <a href="{{ url_for('mortgages.calculator') }}">Calculator</a>         
+        </div>
+    </nav>
+
+
 
     <main class="container">
         {% block content %}{% endblock %}
