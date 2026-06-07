@@ -22,3 +22,7 @@ def create_app():
         return render_template("dashboard.html")
 
     return app
+
+if __name__ == "__main__":
+    application = create_app()
+    application.run(debug=True)
