@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Financial Profile{% endblock %}
+
+{% block content %}
+<h2>Financial Profile</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <label>Annual Income</label>
+    {{ form.annual_income(class="input") }}
+    {% for error in form.annual_income.errors %}
+        <p class="error">{{ error }}</p>
+    {% endfor %}
+
+    <label>Credit Score</label>
+    {{ form.credit_score(class="input") }}
+    {% for error in form.credit_score.errors %}
+        <p class="error">{{ error }}</p>
+    {% endfor %}
+
+    <label>Employment Type</label>
+    {{ form.employment_type(class="input") }}
+    {% for error in form.employment_type.errors %}
+        <p class="error">{{ error }}</p>
+    {% endfor %}
+
+    <label>Monthly Expenses</label>
+    {{ form.monthly_expenses(class="input") }}
+    {% for error in form.monthly_expenses.errors %}
+        <p class="error">{{ error }}</p>
+    {% endfor %}
+
+    <label>Monthly Debts</label>
+    {{ form.monthly_debts(class="input") }}
+    {% for error in form.monthly_debts.errors %}
+        <p class="error">{{ error }}</p>
+    {% endfor %}
+
+    {{ form.submit(class="btn") }}
+</form>
+{% endblock %}

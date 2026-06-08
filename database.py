@@ -32,5 +32,18 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
     """)
+    # Creating user_profiles table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS user_profiles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER UNIQUE NOT NULL,
+        annual_income REAL NOT NULL,
+        credit_score INTEGER NOT NULL,
+        employment_type TEXT NOT NULL,
+        monthly_expenses REAL NOT NULL,
+        monthly_debts REAL NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    );
+""")
     conn.commit()
     conn.close()

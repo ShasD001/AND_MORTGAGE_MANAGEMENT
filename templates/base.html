@@ -11,13 +11,15 @@
         <div class="nav-left">
             <a href="{{ url_for('index') }}" class="logo">MortgageApp</a>
         </div>
+
         <div class="nav-right">
-           <a href="{{ url_for('auth.login') }}">Login</a>
-            <a href="{{ url_for('auth.register') }}">Register</a>        
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('profile.profile') }}">Profile</a>
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
         </div>
     </nav>
-
-
 
     <main class="container">
         {% block content %}{% endblock %}

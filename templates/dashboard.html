@@ -4,35 +4,24 @@
 {% block content %}
 <h2>Your Dashboard</h2>
 
-<p>Welcome back, {{ current_user.email }}.</p>
+<p>Welcome to A.N.D Mortgage Management.</p>
 
 <div class="dashboard-grid">
 
     <div class="dash-card">
-        <h3>Live Mortgage Rates</h3>
-        <p>Compare real‑time mortgage offers from banks.</p>
-        <a class="btn" href="{{ url_for('mortgages.mortgages') }}">View Rates</a>
+        <h3>Financial Profile</h3>
+        <p>Create or update your income, credit score, employment type, expenses, and debts.</p>
+        <a class="btn" href="{{ url_for('profile.profile') }}">Manage Profile</a>
     </div>
 
     <div class="dash-card">
         <h3>Mortgage Calculator</h3>
-        <p>Calculate your monthly payments instantly.</p>
-        <a class="btn" href="{{ url_for('mortgages.calculator') }}">Open Calculator</a>
+        <p>This feature will be added in the mortgage calculator epic.</p>
     </div>
 
     <div class="dash-card">
-        <h3>Your Saved Mortgages</h3>
-        {% if saved_mortgages %}
-            <ul>
-                {% for m in saved_mortgages %}
-                    <li>
-                        {{ m.bank_name }} — £{{ m.amount }} @ {{ m.rate }}% ({{ m.term_years }} years)
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>You have no saved mortgages yet.</p>
-        {% endif %}
+        <h3>Saved Mortgage Applications</h3>
+        <p>This feature will be added in the dashboard/history epic.</p>
     </div>
 
 </div>

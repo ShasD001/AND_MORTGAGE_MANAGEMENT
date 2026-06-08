@@ -48,3 +48,8 @@ h1, h2 {
 .btn:hover {
     background: #1565c0;
 }
+
+.error {
+    color: red;
+    font-size: 0.9rem;
+}

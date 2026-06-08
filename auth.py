@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash
+from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegisterForm, LoginForm
 from database import get_connection
@@ -42,12 +43,20 @@ def login():
         conn.close()
 
         if user and check_password_hash(user["password_hash"], form.password.data):
-            # Here you would log the user in (Flask-Login or your own session)
-            # For now, just flash a message
+            access_token = create_access_token(identity=str(user["id"]))
+
+            response = redirect(url_for("dashboard"))
+            response.set_cookie("access_token", access_token, httponly=True)
+
             flash("Logged in successfully.", "success")
-            return redirect(url_for("dashboard"))
-        else:
-            flash("Invalid credentials.", "danger")
+            return response
 
     return render_template("login.html", form=form)
+
+@auth_bp.route("/logout")
+def logout():
+    response = redirect(url_for("auth.login"))
+    response.delete_cookie("access_token")
+    flash("Logged out successfully.", "success")
+    return response
 
