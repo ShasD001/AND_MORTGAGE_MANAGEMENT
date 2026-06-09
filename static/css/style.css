@@ -3,7 +3,6 @@ body {
     font-family: Arial, sans-serif;
     background: #f7f7f7;
 }
-
 /* NAVBAR */
 .navbar {
     background: #000000;   /* Black bar */
@@ -18,7 +17,18 @@ body {
     margin-left: 15px;
     text-decoration: none;
     font-weight: bold;
+
+    padding: 8px 12px;              /* Makes hover look cleaner */
+    border-radius: 4px;             /* Smooth rounded corners */
+
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
+
+.navbar a:hover {
+    background: #ffeb3b;            /* Yellow hover */
+    color: #000000;                 /* Black text */
+}
+
 
 /* MAIN CONTAINER */
 .container {
