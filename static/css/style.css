@@ -4,8 +4,9 @@ body {
     background: #f7f7f7;
 }
 
+/* NAVBAR */
 .navbar {
-    background: #1e88e5;
+    background: #000000;   /* Black bar */
     padding: 15px 20px;
     color: white;
     display: flex;
@@ -19,6 +20,7 @@ body {
     font-weight: bold;
 }
 
+/* MAIN CONTAINER */
 .container {
     width: 80%;
     margin: 30px auto;
@@ -31,24 +33,31 @@ h1, h2 {
     color: #333;
 }
 
+/* INPUT FIELDS */
 .input, input {
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
 }
 
+/* BUTTONS */
 .btn {
-    background: #1e88e5;
+    background: #1e88e5;          /* Blue default */
     color: white;
     padding: 10px 15px;
     border: none;
     cursor: pointer;
+
+    /* Smooth transition */
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .btn:hover {
-    background: #1565c0;
+    background: #ffeb3b;          /* Yellow hover */
+    color: #000000;               /* Black text on yellow */
 }
 
+/* ERROR MESSAGES */
 .error {
     color: red;
     font-size: 0.9rem;
