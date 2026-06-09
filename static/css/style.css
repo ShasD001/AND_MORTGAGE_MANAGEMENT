@@ -42,7 +42,7 @@ h1, h2 {
 
 /* BUTTONS */
 .btn {
-    background: #1e88e5;          /* Blue default */
+    background: #000000;          /* Blue default */
     color: white;
     padding: 10px 15px;
     border: none;
