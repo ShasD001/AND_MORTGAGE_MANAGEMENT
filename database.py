@@ -43,7 +43,36 @@ def init_db():
         monthly_expenses REAL NOT NULL,
         monthly_debts REAL NOT NULL,
         FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS banks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        max_income_multiple REAL NOT NULL,
+        max_ltv REAL NOT NULL,
+        min_income REAL NOT NULL,
+        accepted_employment_type TEXT NOT NULL,
+        active INTEGER DEFAULT 1
     );
-""")
+    """)
+    cursor.execute("""
+    INSERT OR IGNORE INTO banks
+    (id,name,max_income_multiple,max_ltv,min_income,accepted_employment_type)
+    VALUES
+    (1,'Bank A',4.5,90,25000,'employed'),
+    (2,'Bank B',5.0,85,30000,'employed'),
+    (3,'Bank C',4.0,95,20000,'self-employed');
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS eligibility_results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        application_id INTEGER,
+        bank_id INTEGER,
+        eligible INTEGER,
+        reason TEXT,
+        FOREIGN KEY(bank_id) REFERENCES banks(id)
+    );
+    """)
     conn.commit()
     conn.close()

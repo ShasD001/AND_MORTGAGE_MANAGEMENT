@@ -5,6 +5,8 @@ from config import Config
 from auth import auth_bp
 from database import init_db
 from profile_routes import profile_bp
+from database import get_connection
+from eligibility_checker import check_bank_eligibility
 
 def create_app():
     app = Flask(__name__)
@@ -30,6 +32,52 @@ def create_app():
     @jwt_required()
     def dashboard():
         return render_template("dashboard.html")
+    
+    @app.route("/test-eligibility")
+    def test_eligibility():
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        SELECT *
+        FROM user_profiles
+        LIMIT 1
+        """)
+
+        profile = cursor.fetchone()
+
+        cursor.execute("""
+        SELECT *
+        FROM banks
+        """)
+
+        banks = cursor.fetchall()
+
+        application = {
+            "loan_amount": 180000,
+            "ltv": 85
+        }
+
+        results = []
+
+        for bank in banks:
+
+            eligible, reasons = check_bank_eligibility(
+                profile,
+                application,
+                bank
+            )
+
+            results.append({
+                "bank": bank["name"],
+                "eligible": eligible,
+                "reasons": reasons
+            })
+
+        conn.close()
+
+        return {"results": results}
 
     return app
 
