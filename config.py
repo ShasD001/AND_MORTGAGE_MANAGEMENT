@@ -25,4 +25,4 @@ class Config:
     API_NINJAS_MORTGAGE_CALCULATOR_ENDPOINT = "/v1/mortgagecalculator"
 
     # Replace with your real API key later
-    API_NINJAS_KEY = "your-api-ninjas-key-here"
+    API_NINJAS_KEY = "a1bAaHfrR0fTt7bq7CMBXzxPc7r5f4imTF1Y2E8X"

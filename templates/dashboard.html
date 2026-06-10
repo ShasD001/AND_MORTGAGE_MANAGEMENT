@@ -6,6 +6,7 @@
 
 <p>Welcome to A.N.D Mortgage Management.</p>
 
+<!--New Dashboard page updated with option for the user to input more info and calculate mortgage info-->
 <div class="dashboard-grid">
 
     <div class="dash-card">
@@ -15,14 +16,177 @@
     </div>
 
     <div class="dash-card">
-        <h3>Mortgage Calculator</h3>
-        <p>This feature will be added in the mortgage calculator epic.</p>
+        <h3>Temporary Mortgage API Test</h3>
+        <p>Enter loan amount, interest rate, and term to test the API and save the result.</p>
     </div>
 
     <div class="dash-card">
-        <h3>Saved Mortgage Applications</h3>
-        <p>This feature will be added in the dashboard/history epic.</p>
+        <h3>Latest Mortgage Result</h3>
+
+        {% if latest_result %}
+            <p><strong>Status:</strong> {{ latest_result["affordability_status"] }}</p>
+            <p><strong>Monthly Repayment:</strong> £{{ "%.2f"|format(latest_result["monthly_repayment"]) }}</p>
+            <p><strong>Maximum Borrowing:</strong> £{{ "%.2f"|format(latest_result["max_borrowing"]) }}</p>
+        {% else %}
+            <p>No mortgage calculation found yet.</p>
+            <p>Please complete your profile first, then test the mortgage calculation below.</p>
+        {% endif %}
     </div>
 
 </div>
+
+<hr>
+<!--New temporary mortgage api test form added-->
+<section class="result-card">
+    <h3>Temporary Mortgage API Test Form</h3>
+
+    <p>
+        Use this form to test whether the API calculation and database saving are working.
+    </p>
+
+    <form method="POST" action="{{ url_for('test_mortgage') }}">
+
+        <label>Loan Amount</label>
+        <input class="input" type="number" step="0.01" name="amount" required>
+
+        <label>Interest Rate (%)</label>
+        <input class="input" type="number" step="0.01" name="rate" required>
+
+        <label>Mortgage Term in Years</label>
+        <input class="input" type="number" name="term_years" required>
+
+        <button class="btn" type="submit">Test API and Save Result</button>
+
+    </form>
+</section>
+
+<hr>
+
+{% if latest_result %}
+
+<section class="result-card">
+    <h3>Database Result Found</h3>
+
+    <h4>User Profile Details from Database</h4>
+
+    <p><strong>Annual Income:</strong>
+        £{{ "%.2f"|format(latest_result["annual_income"]) }}
+    </p>
+
+    <p><strong>Credit Score:</strong>
+        {{ latest_result["credit_score"] }}
+    </p>
+
+    <p><strong>Employment Type:</strong>
+        {{ latest_result["employment_type"] }}
+    </p>
+
+    <p><strong>Monthly Expenses:</strong>
+        £{{ "%.2f"|format(latest_result["monthly_expenses"]) }}
+    </p>
+
+    <p><strong>Monthly Debts:</strong>
+        £{{ "%.2f"|format(latest_result["monthly_debts"]) }}
+    </p>
+</section>
+
+<section class="result-card">
+    <h4>Mortgage Details from Database</h4>
+
+    <p><strong>Loan Amount:</strong>
+        £{{ "%.2f"|format(latest_result["amount"]) }}
+    </p>
+
+    <p><strong>Interest Rate:</strong>
+        {{ "%.2f"|format(latest_result["rate"]) }}%
+    </p>
+
+    <p><strong>Mortgage Term:</strong>
+        {{ latest_result["term_years"] }} years
+    </p>
+</section>
+
+<section class="result-card">
+    <h4>API Repayment Results Saved in Database</h4>
+
+    <p><strong>Monthly Repayment:</strong>
+        £{{ "%.2f"|format(latest_result["monthly_repayment"]) }}
+    </p>
+
+    <p><strong>Annual Repayment:</strong>
+        £{{ "%.2f"|format(latest_result["annual_repayment"]) }}
+    </p>
+
+    <p><strong>Total Interest Payable:</strong>
+        £{{ "%.2f"|format(latest_result["total_interest_payable"]) }}
+    </p>
+</section>
+
+<section class="result-card">
+    <h4>SQL Calculations from database.py</h4>
+
+    <p><strong>Income Multiple Used:</strong>
+        {{ "%.2f"|format(latest_result["income_multiple"]) }}x
+    </p>
+
+    <p><strong>Maximum Borrowing:</strong>
+        £{{ "%.2f"|format(latest_result["max_borrowing"]) }}
+    </p>
+
+    <p><strong>Monthly Income:</strong>
+        £{{ "%.2f"|format(latest_result["monthly_income"]) }}
+    </p>
+
+    <p><strong>Monthly Disposable Income:</strong>
+        £{{ "%.2f"|format(latest_result["monthly_disposable_income"]) }}
+    </p>
+
+    <p><strong>Total Repayment:</strong>
+        £{{ "%.2f"|format(latest_result["total_repayment"]) }}
+    </p>
+
+    {% if latest_result["repayment_percentage"] is not none %}
+        <p><strong>Repayment Percentage:</strong>
+            {{ "%.2f"|format(latest_result["repayment_percentage"]) }}%
+        </p>
+    {% else %}
+        <p><strong>Repayment Percentage:</strong>
+            Not available
+        </p>
+    {% endif %}
+
+    <p><strong>Affordability Status:</strong>
+        {{ latest_result["affordability_status"] }}
+    </p>
+
+    <p><strong>Warning:</strong>
+        {{ latest_result["warning_message"] }}
+    </p>
+
+    <p><em>{{ latest_result["estimate_note"] }}</em></p>
+</section>
+
+{% else %}
+
+<section class="result-card">
+    <h3>No Database Result Found Yet</h3>
+
+    <p>
+        The dashboard is connected to the database, but the SQL query has not found
+        a complete mortgage result for this user yet.
+    </p>
+
+    <p>To test it:</p>
+
+    <ol>
+        <li>Complete your profile first using the Manage Profile button.</li>
+        <li>Return to the dashboard.</li>
+        <li>Enter loan amount, interest rate, and term in the test form.</li>
+        <li>Submit the form.</li>
+        <li>The result should appear here.</li>
+    </ol>
+</section>
+
+{% endif %}
+
 {% endblock %}
