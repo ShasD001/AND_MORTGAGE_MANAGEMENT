@@ -25,3 +25,22 @@ class ProfileForm(FlaskForm):
     monthly_expenses = FloatField("Monthly Expenses", validators=[DataRequired(), NumberRange(min=0)])
     monthly_debts = FloatField("Monthly Debts", validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField("Save Profile")
+
+# New form for the mortgage calculator.
+class MortgageCalculatorForm(FlaskForm):
+    amount = FloatField(
+        "Loan Amount",
+        validators=[DataRequired(), NumberRange(min=1)]
+    )
+
+    rate = FloatField(
+        "Interest Rate",
+        validators=[DataRequired(), NumberRange(min=0)]
+    )
+
+    term_years = IntegerField(
+        "Mortgage Term in Years",
+        validators=[DataRequired(), NumberRange(min=1, max=100)]
+    )
+
+    submit = SubmitField("Calculate Mortgage")
