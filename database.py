@@ -26,9 +26,7 @@ def init_db():
             password_hash TEXT NOT NULL
         );
     """)
-
-    # Create mortgages table
-    # This now includes the extra mortgage API result columns needed for Epic 3.
+    # Creating mortgages table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS mortgages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,8 +62,8 @@ def init_db():
 
             FOREIGN KEY(user_id) REFERENCES users(id)
             ON DELETE CASCADE
-        );
-    """)
+            );
+        """)
 
     # If the mortgages table already existed before Epic 3,
     # CREATE TABLE IF NOT EXISTS will not add the new columns.
@@ -126,6 +124,35 @@ def save_mortgage_result(
         total_interest_payable
     ))
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS banks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        max_income_multiple REAL NOT NULL,
+        max_ltv REAL NOT NULL,
+        min_income REAL NOT NULL,
+        accepted_employment_type TEXT NOT NULL,
+        active INTEGER DEFAULT 1
+    );
+    """)
+    cursor.execute("""
+    INSERT OR IGNORE INTO banks
+    (id,name,max_income_multiple,max_ltv,min_income,accepted_employment_type)
+    VALUES
+    (1,'Bank A',4.5,90,25000,'employed'),
+    (2,'Bank B',5.0,85,30000,'employed'),
+    (3,'Bank C',4.0,95,20000,'self-employed');
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS eligibility_results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        application_id INTEGER,
+        bank_id INTEGER,
+        eligible INTEGER,
+        reason TEXT,
+        FOREIGN KEY(bank_id) REFERENCES banks(id)
+    );
+    """)
     conn.commit()
     conn.close()
 
