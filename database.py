@@ -4,13 +4,9 @@ DB_PATH = "mortgage_app.db"
 
 
 def get_connection():
-    # Returns a connection to the SQLite database
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-
-    # Enables foreign key behaviour in SQLite
     conn.execute("PRAGMA foreign_keys = ON")
-
     return conn
 
 
@@ -18,7 +14,6 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Create users table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +21,7 @@ def init_db():
             password_hash TEXT NOT NULL
         );
     """)
-    # Creating mortgages table
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS mortgages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +43,6 @@ def init_db():
         );
     """)
 
-    # Create user_profiles table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_profiles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,10 +56,9 @@ def init_db():
 
             FOREIGN KEY(user_id) REFERENCES users(id)
             ON DELETE CASCADE
-            );
-        """)
-    
-        # Create banks table for eligibility matching
+        );
+    """)
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS banks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,53 +71,90 @@ def init_db():
         );
     """)
 
-    # Seed default bank rules
     cursor.execute("""
-        INSERT OR IGNORE INTO banks
-        (id, name, max_income_multiple, max_ltv, min_income, accepted_employment_type, active)
+        INSERT OR IGNORE INTO banks (
+            id,
+            name,
+            max_income_multiple,
+            max_ltv,
+            min_income,
+            accepted_employment_type,
+            active
+        )
         VALUES
-        (1, 'Bank A', 4.5, 90, 25000, 'employed', 1),
-        (2, 'Bank B', 5.0, 85, 30000, 'employed', 1),
-        (3, 'Bank C', 4.0, 95, 20000, 'self-employed', 1);
+            (1, 'Bank A', 4.5, 90, 25000, 'employed', 1),
+            (2, 'Bank B', 5.0, 85, 30000, 'employed', 1),
+            (3, 'Bank C', 4.0, 95, 20000, 'self-employed', 1);
     """)
 
-    # Create eligibility results table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS eligibility_results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            mortgage_id INTEGER NOT NULL,
+            mortgage_id INTEGER,
             bank_id INTEGER NOT NULL,
             eligible INTEGER NOT NULL,
             reason TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(mortgage_id) REFERENCES mortgages(id) ON DELETE CASCADE,
-            FOREIGN KEY(bank_id) REFERENCES banks(id) ON DELETE CASCADE
+
+            FOREIGN KEY(mortgage_id) REFERENCES mortgages(id)
+            ON DELETE CASCADE,
+
+            FOREIGN KEY(bank_id) REFERENCES banks(id)
+            ON DELETE CASCADE
         );
     """)
 
-    # If the mortgages table already existed before Epic 3,
-    # CREATE TABLE IF NOT EXISTS will not add the new columns.
-    # This section safely adds missing columns without deleting existing data.
     cursor.execute("PRAGMA table_info(mortgages)")
-    existing_columns = [column["name"] for column in cursor.fetchall()]
+    existing_mortgage_columns = [column["name"] for column in cursor.fetchall()]
 
-    if "monthly_repayment" not in existing_columns:
+    if "monthly_repayment" not in existing_mortgage_columns:
         cursor.execute("ALTER TABLE mortgages ADD COLUMN monthly_repayment REAL")
 
-    if "annual_repayment" not in existing_columns:
+    if "annual_repayment" not in existing_mortgage_columns:
         cursor.execute("ALTER TABLE mortgages ADD COLUMN annual_repayment REAL")
 
-    if "total_interest_payable" not in existing_columns:
+    if "total_interest_payable" not in existing_mortgage_columns:
         cursor.execute("ALTER TABLE mortgages ADD COLUMN total_interest_payable REAL")
 
-    if "created_at" not in existing_columns:
+    if "created_at" not in existing_mortgage_columns:
         cursor.execute("ALTER TABLE mortgages ADD COLUMN created_at TIMESTAMP")
+
+    cursor.execute("PRAGMA table_info(banks)")
+    existing_bank_columns = [column["name"] for column in cursor.fetchall()]
+
+    if "active" not in existing_bank_columns:
+        cursor.execute("ALTER TABLE banks ADD COLUMN active INTEGER DEFAULT 1")
+
+    cursor.execute("PRAGMA table_info(eligibility_results)")
+    existing_eligibility_columns = [column["name"] for column in cursor.fetchall()]
+
+    if "mortgage_id" not in existing_eligibility_columns:
+        cursor.execute("ALTER TABLE eligibility_results ADD COLUMN mortgage_id INTEGER")
+
+    if "created_at" not in existing_eligibility_columns:
+        cursor.execute("ALTER TABLE eligibility_results ADD COLUMN created_at TIMESTAMP")
 
     conn.commit()
     conn.close()
 
 
-# Saves the mortgage result returned from the API
+def get_user_profile(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM user_profiles
+        WHERE user_id = ?
+    """, (user_id,))
+
+    profile = cursor.fetchone()
+
+    conn.close()
+
+    return profile
+
+
 def save_mortgage_result(
     user_id,
     amount,
@@ -161,40 +191,10 @@ def save_mortgage_result(
         total_interest_payable
     ))
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS banks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        max_income_multiple REAL NOT NULL,
-        max_ltv REAL NOT NULL,
-        min_income REAL NOT NULL,
-        accepted_employment_type TEXT NOT NULL,
-        active INTEGER DEFAULT 1
-    );
-    """)
-    cursor.execute("""
-    INSERT OR IGNORE INTO banks
-    (id,name,max_income_multiple,max_ltv,min_income,accepted_employment_type)
-    VALUES
-    (1,'Bank A',4.5,90,25000,'employed'),
-    (2,'Bank B',5.0,85,30000,'employed'),
-    (3,'Bank C',4.0,95,20000,'self-employed');
-    """)
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS eligibility_results (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        application_id INTEGER,
-        bank_id INTEGER,
-        eligible INTEGER,
-        reason TEXT,
-        FOREIGN KEY(bank_id) REFERENCES banks(id)
-    );
-    """)
     conn.commit()
     conn.close()
 
 
-# Obtains the latest mortgage summary using SQL queries for the logged-in user
 def get_latest_mortgage_summary(user_id, income_multiple=4.5):
     conn = get_connection()
     cursor = conn.cursor()
