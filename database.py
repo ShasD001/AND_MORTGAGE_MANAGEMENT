@@ -64,6 +64,43 @@ def init_db():
             ON DELETE CASCADE
             );
         """)
+    
+        # Create banks table for eligibility matching
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS banks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            max_income_multiple REAL NOT NULL,
+            max_ltv REAL NOT NULL,
+            min_income REAL NOT NULL,
+            accepted_employment_type TEXT NOT NULL,
+            active INTEGER DEFAULT 1
+        );
+    """)
+
+    # Seed default bank rules
+    cursor.execute("""
+        INSERT OR IGNORE INTO banks
+        (id, name, max_income_multiple, max_ltv, min_income, accepted_employment_type, active)
+        VALUES
+        (1, 'Bank A', 4.5, 90, 25000, 'employed', 1),
+        (2, 'Bank B', 5.0, 85, 30000, 'employed', 1),
+        (3, 'Bank C', 4.0, 95, 20000, 'self-employed', 1);
+    """)
+
+    # Create eligibility results table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS eligibility_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mortgage_id INTEGER NOT NULL,
+            bank_id INTEGER NOT NULL,
+            eligible INTEGER NOT NULL,
+            reason TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(mortgage_id) REFERENCES mortgages(id) ON DELETE CASCADE,
+            FOREIGN KEY(bank_id) REFERENCES banks(id) ON DELETE CASCADE
+        );
+    """)
 
     # If the mortgages table already existed before Epic 3,
     # CREATE TABLE IF NOT EXISTS will not add the new columns.

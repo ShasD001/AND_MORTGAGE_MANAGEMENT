@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Bank Eligibility Results{% endblock %}
+
+{% block content %}
+<h2>Bank Eligibility Results</h2>
+
+<section class="result-card">
+    <h3>Your Mortgage Details</h3>
+    <p><strong>Loan Amount:</strong> £{{ "%.2f"|format(mortgage["amount"]) }}</p>
+    <p><strong>Estimated LTV:</strong> {{ "%.2f"|format(ltv) }}%</p>
+    <p><strong>Annual Income:</strong> £{{ "%.2f"|format(profile["annual_income"]) }}</p>
+    <p><strong>Employment Type:</strong> {{ profile["employment_type"] }}</p>
+</section>
+
+<section class="result-card">
+    <h3>Eligibility Results</h3>
+
+    <table>
+        <tr>
+            <th>Bank</th>
+            <th>Status</th>
+            <th>Reason</th>
+            <th>Max LTV</th>
+            <th>Income Multiple</th>
+        </tr>
+
+        {% for result in results %}
+        <tr>
+            <td>{{ result.bank_name }}</td>
+            <td>
+                {% if result.eligible %}
+                    Eligible
+                {% else %}
+                    Not Eligible
+                {% endif %}
+            </td>
+            <td>{{ result.reason }}</td>
+            <td>{{ result.max_ltv }}%</td>
+            <td>{{ result.max_income_multiple }}x</td>
+        </tr>
+        {% endfor %}
+    </table>
+</section>
+
+<a class="btn" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+{% endblock %}
