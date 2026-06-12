@@ -1,19 +1,21 @@
-FROM python
+FROM python:3.11-slim
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the container
-COPY requirements.txt .
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install the dependencies
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Copy the rest of the application code into the container
 COPY . .
 
-# Expose the port that the application will run on
 EXPOSE 5000
 
-# Set the command to run the application
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
 CMD ["python", "app.py"]
