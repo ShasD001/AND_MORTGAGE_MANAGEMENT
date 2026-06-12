@@ -4,43 +4,62 @@
 {% block content %}
 <h2>Bank Eligibility Results</h2>
 
-<section class="result-card">
-    <h3>Your Mortgage Details</h3>
-    <p><strong>Loan Amount:</strong> £{{ "%.2f"|format(mortgage["amount"]) }}</p>
-    <p><strong>Estimated LTV:</strong> {{ "%.2f"|format(ltv) }}%</p>
-    <p><strong>Annual Income:</strong> £{{ "%.2f"|format(profile["annual_income"]) }}</p>
-    <p><strong>Employment Type:</strong> {{ profile["employment_type"] }}</p>
-</section>
+<div class="summary-comparison">
 
-<section class="result-card">
-    <h3>Eligibility Results</h3>
+    <section class="result-card">
+        <h3>Your Mortgage Details</h3>
 
-    <table>
-        <tr>
-            <th>Bank</th>
-            <th>Status</th>
-            <th>Reason</th>
-            <th>Max LTV</th>
-            <th>Income Multiple</th>
-        </tr>
+        <p><strong>Loan Amount:</strong> £{{ "%.2f"|format(mortgage["amount"]) }}</p>
+        <p><strong>Estimated LTV:</strong> {{ "%.2f"|format(ltv) }}%</p>
+        <p><strong>Annual Income:</strong> £{{ "%.2f"|format(profile["annual_income"]) }}</p>
+        <p><strong>Employment Type:</strong> {{ profile["employment_type"] }}</p>
+    </section>
 
-        {% for result in results %}
-        <tr>
-            <td>{{ result.bank_name }}</td>
-            <td>
-                {% if result.eligible %}
-                    Eligible
-                {% else %}
-                    Not Eligible
-                {% endif %}
-            </td>
-            <td>{{ result.reason }}</td>
-            <td>{{ result.max_ltv }}%</td>
-            <td>{{ result.max_income_multiple }}x</td>
-        </tr>
-        {% endfor %}
-    </table>
-</section>
+    <section class="result-card">
+        <h3>Affordability Breakdown</h3>
+
+        <p><strong>Monthly Repayment:</strong>
+            £{{ "%.2f"|format(latest_result["monthly_repayment"]) }}
+        </p>
+
+        <p><strong>Maximum Borrowing:</strong>
+            £{{ "%.2f"|format(latest_result["max_borrowing"]) }}
+        </p>
+
+        <p><strong>Disposable Income:</strong>
+            £{{ "%.2f"|format(latest_result["monthly_disposable_income"]) }}
+        </p>
+
+        <p><strong>Affordability Status:</strong>
+            {{ latest_result["affordability_status"] }}
+        </p>
+
+        <p><strong>Repayment Percentage:</strong>
+            {{ "%.2f"|format(latest_result["repayment_percentage"]) }}%
+        </p>
+    </section>
+
+</div>
+
+<div class="eligibility-grid">
+    {% for result in results %}
+        <section class="eligibility-card">
+            <h3>{{ result.bank_name }}</h3>
+
+            {% if result.eligible %}
+                <span class="eligibility-status eligible">Eligible</span>
+            {% else %}
+                <span class="eligibility-status not-eligible">Not Eligible</span>
+            {% endif %}
+
+            <p><strong>Reason:</strong> {{ result.reason }}</p>
+            <p><strong>Maximum LTV:</strong> {{ result.max_ltv }}%</p>
+            <p><strong>Income Multiple:</strong> {{ result.max_income_multiple }}x</p>
+            <p><strong>Minimum Income:</strong> £{{ "%.2f"|format(result.min_income) }}</p>
+            <p><strong>Accepted Employment Type:</strong> {{ result.accepted_employment_type }}</p>
+        </section>
+    {% endfor %}
+</div>
 
 <a class="btn" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 {% endblock %}

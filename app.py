@@ -67,6 +67,11 @@ def create_app():
     def eligibility():
         user_id = int(get_jwt_identity())
 
+        latest_result = get_latest_mortgage_summary(
+            user_id=user_id,
+            income_multiple=4.5
+        )
+
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -167,7 +172,8 @@ def create_app():
             profile=profile,
             mortgage=mortgage,
             ltv=ltv,
-            results=results
+            results=results,
+            latest_result=latest_result
         )
 
     return app
