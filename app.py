@@ -37,8 +37,10 @@ def create_app():
         )
         return redirect(url_for("auth.register"))
 
+    # Initialize MySQL tables
     init_db()
 
+    # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(mortgage_bp)
@@ -68,30 +70,30 @@ def create_app():
         user_id = int(get_jwt_identity())
 
         conn = get_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
+        # Fetch profile
         cursor.execute("""
             SELECT *
             FROM user_profiles
-            WHERE user_id = ?
+            WHERE user_id = %s
         """, (user_id,))
 
         profile = cursor.fetchone()
 
         if not profile:
             conn.close()
-
             flash(
                 "Please complete your financial profile before checking bank eligibility.",
                 "warning"
             )
-
             return redirect(url_for("profile.profile"))
 
+        # Fetch latest mortgage
         cursor.execute("""
             SELECT *
             FROM mortgages
-            WHERE user_id = ?
+            WHERE user_id = %s
             ORDER BY created_at DESC, id DESC
             LIMIT 1
         """, (user_id,))
@@ -100,14 +102,13 @@ def create_app():
 
         if not mortgage:
             conn.close()
-
             flash(
                 "Please complete a mortgage calculation before checking bank eligibility.",
                 "warning"
             )
-
             return redirect(url_for("dashboard"))
 
+        # Calculate LTV
         assumed_property_price = mortgage["amount"] / 0.85
         ltv = round((mortgage["amount"] / assumed_property_price) * 100, 2)
 
@@ -117,6 +118,7 @@ def create_app():
             "ltv": ltv
         }
 
+        # Fetch active banks
         cursor.execute("""
             SELECT *
             FROM banks
@@ -134,6 +136,7 @@ def create_app():
                 bank
             )
 
+            # Save eligibility result
             cursor.execute("""
                 INSERT INTO eligibility_results (
                     mortgage_id,
@@ -141,7 +144,7 @@ def create_app():
                     eligible,
                     reason
                 )
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             """, (
                 mortgage["id"],
                 bank["id"],

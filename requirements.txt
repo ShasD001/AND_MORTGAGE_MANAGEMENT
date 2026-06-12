@@ -4,3 +4,5 @@ flask-jwt-extended
 Werkzeug
 WTForms
 email-validator
+mysql-connector-python
+pymysql
