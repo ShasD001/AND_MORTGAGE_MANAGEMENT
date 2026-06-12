@@ -12,45 +12,42 @@ profile_bp = Blueprint("profile", __name__)
 @jwt_required()
 def profile():
     user_id = int(get_jwt_identity())
-
     form = ProfileForm()
 
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
+    # Fetch existing profile
     cursor.execute(
-        "SELECT * FROM user_profiles WHERE user_id = ?",
+        "SELECT * FROM user_profiles WHERE user_id = %s",
         (user_id,)
     )
-
     profile_data = cursor.fetchone()
 
+    # Handle form submission
     if form.validate_on_submit():
-        annual_income = float(form.annual_income.data)
-        credit_score = int(form.credit_score.data)
-        employment_type = form.employment_type.data
-        monthly_expenses = float(form.monthly_expenses.data)
-        monthly_debts = float(form.monthly_debts.data)
 
         if profile_data:
+            # UPDATE existing profile
             cursor.execute("""
                 UPDATE user_profiles
-                SET annual_income = ?,
-                    credit_score = ?,
-                    employment_type = ?,
-                    monthly_expenses = ?,
-                    monthly_debts = ?
-                WHERE user_id = ?
+                SET annual_income = %s,
+                    credit_score = %s,
+                    employment_type = %s,
+                    monthly_expenses = %s,
+                    monthly_debts = %s
+                WHERE user_id = %s
             """, (
-                annual_income,
-                credit_score,
-                employment_type,
-                monthly_expenses,
-                monthly_debts,
+                form.annual_income.data,
+                form.credit_score.data,
+                form.employment_type.data,
+                form.monthly_expenses.data,
+                form.monthly_debts.data,
                 user_id
             ))
 
         else:
+            # INSERT new profile
             cursor.execute("""
                 INSERT INTO user_profiles (
                     user_id,
@@ -60,26 +57,23 @@ def profile():
                     monthly_expenses,
                     monthly_debts
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s)
             """, (
                 user_id,
-                annual_income,
-                credit_score,
-                employment_type,
-                monthly_expenses,
-                monthly_debts
+                form.annual_income.data,
+                form.credit_score.data,
+                form.employment_type.data,
+                form.monthly_expenses.data,
+                form.monthly_debts.data
             ))
 
         conn.commit()
         conn.close()
 
-        flash(
-            "Profile saved successfully. You can now calculate your mortgage.",
-            "success"
-        )
-
+        flash("Profile saved successfully.", "success")
         return redirect(url_for("dashboard"))
 
+    # Pre-fill form if profile exists
     if profile_data:
         form.annual_income.data = profile_data["annual_income"]
         form.credit_score.data = profile_data["credit_score"]
