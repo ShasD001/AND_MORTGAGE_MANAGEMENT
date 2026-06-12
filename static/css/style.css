@@ -198,6 +198,62 @@ th {
 }
 
 
+/* ELIGIBILITY PAGE */
+.eligibility-grid {
+    display: grid;
+    gap: 24px;
+    margin-top: 25px;
+}
+
+.eligibility-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    margin-bottom: 22px;
+}
+
+.eligibility-card p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.eligibility-status {
+    display: inline-block;
+    margin: 12px 0;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.eligible {
+    background: #d4edda;
+    color: #155724;
+}
+
+.not-eligible {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.summary-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 35px;
+}
+
+.summary-comparison .result-card {
+    padding: 30px;
+}
+
+.summary-comparison p {
+    margin: 14px 0;
+    line-height: 1.6;
+}
+
+
+
 /* ANIMATIONS */
 @keyframes fadeIn {
     from {

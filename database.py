@@ -84,7 +84,30 @@ def init_db():
         );
     """)
 
-    # 5) ELIGIBILITY RESULTS (FK -> mortgages, banks)
+    cursor.execute("""
+    INSERT INTO banks
+    (id, name, max_income_multiple, max_ltv, min_income, accepted_employment_type, active)
+    VALUES
+    (1, 'HSBC', 4.5, 90, 25000, 'employed', 1),
+    (2, 'Barclays', 4.75, 85, 30000, 'employed', 1),
+    (3, 'Lloyds Bank', 4.5, 90, 22000, 'employed', 1),
+    (4, 'NatWest', 4.25, 85, 24000, 'employed', 1),
+    (5, 'Santander', 5.0, 80, 30000, 'employed', 1),
+    (6, 'Halifax', 4.5, 95, 20000, 'employed', 1),
+    (7, 'Nationwide', 4.75, 90, 25000, 'self-employed', 1),
+    (8, 'TSB', 4.0, 85, 21000, 'employed', 1),
+    (9, 'Virgin Money', 4.25, 90, 26000, 'self-employed', 1),
+    (10, 'Metro Bank', 4.0, 80, 23000, 'employed', 1)
+    ON DUPLICATE KEY UPDATE
+        name = VALUES(name),
+        max_income_multiple = VALUES(max_income_multiple),
+        max_ltv = VALUES(max_ltv),
+        min_income = VALUES(min_income),
+        accepted_employment_type = VALUES(accepted_employment_type),
+        active = VALUES(active);
+    """)
+
+    # 5) ELIGIBILITY RESULTS
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS eligibility_results (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -96,18 +119,6 @@ def init_db():
             FOREIGN KEY (mortgage_id) REFERENCES mortgages(id) ON DELETE CASCADE,
             FOREIGN KEY (bank_id) REFERENCES banks(id) ON DELETE CASCADE
         );
-    """)
-
-    # Seed banks
-    cursor.execute("""
-        INSERT IGNORE INTO banks (
-            id, name, max_income_multiple, max_ltv, min_income,
-            accepted_employment_type, active
-        )
-        VALUES
-            (1, 'Bank A', 4.5, 90, 25000, 'employed', 1),
-            (2, 'Bank B', 5.0, 85, 30000, 'employed', 1),
-            (3, 'Bank C', 4.0, 95, 20000, 'self-employed', 1);
     """)
 
     conn.commit()

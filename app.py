@@ -69,6 +69,11 @@ def create_app():
     def eligibility():
         user_id = int(get_jwt_identity())
 
+        latest_result = get_latest_mortgage_summary(
+            user_id=user_id,
+            income_multiple=4.5
+        )
+
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
@@ -109,12 +114,13 @@ def create_app():
             return redirect(url_for("dashboard"))
 
         # Calculate LTV
-        assumed_property_price = mortgage["amount"] / 0.85
-        ltv = round((mortgage["amount"] / assumed_property_price) * 100, 2)
+        mortgage_amount = float(mortgage["amount"])
+        assumed_property_price = mortgage_amount / 0.85
+        ltv = round((mortgage_amount / assumed_property_price) * 100, 2)
 
         mortgage_data = {
             "id": mortgage["id"],
-            "amount": mortgage["amount"],
+            "amount": mortgage_amount,
             "ltv": ltv
         }
 
@@ -170,7 +176,8 @@ def create_app():
             profile=profile,
             mortgage=mortgage,
             ltv=ltv,
-            results=results
+            results=results,
+            latest_result=latest_result
         )
 
     return app
