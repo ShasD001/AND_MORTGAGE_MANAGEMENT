@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mortgage-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mortgage-app
+  template:
+    metadata:
+      labels:
+        app: mortgage-app
+    spec:
+      containers:
+        - name: AND_MORTGAGE_MANAGEMENT
+          image: mortgage-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5050
+          envFrom:
+            - secretRef:
+                name: mortgage-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mortgage-app-service
+spec:
+  type: NodePort
+  selector:
+    app: mortgage-app
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30080
