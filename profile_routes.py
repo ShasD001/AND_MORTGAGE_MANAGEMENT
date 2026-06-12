@@ -11,31 +11,19 @@ profile_bp = Blueprint("profile", __name__)
 @profile_bp.route("/profile", methods=["GET", "POST"])
 @jwt_required()
 def profile():
-    # Gets the logged-in user's ID from the JWT token
     user_id = int(get_jwt_identity())
-
     form = ProfileForm()
 
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Checks whether this user already has a saved financial profile
     cursor.execute(
         "SELECT * FROM user_profiles WHERE user_id = ?",
         (user_id,)
     )
-
     profile_data = cursor.fetchone()
 
     if form.validate_on_submit():
-        # Converts form values into the correct Python data types before saving
-        annual_income = float(form.annual_income.data)
-        credit_score = int(form.credit_score.data)
-        employment_type = form.employment_type.data
-        monthly_expenses = float(form.monthly_expenses.data)
-        monthly_debts = float(form.monthly_debts.data)
-
-        # If the profile already exists, update the existing row
         if profile_data:
             cursor.execute("""
                 UPDATE user_profiles
@@ -46,15 +34,13 @@ def profile():
                     monthly_debts = ?
                 WHERE user_id = ?
             """, (
-                annual_income,
-                credit_score,
-                employment_type,
-                monthly_expenses,
-                monthly_debts,
+                form.annual_income.data,
+                form.credit_score.data,
+                form.employment_type.data,
+                form.monthly_expenses.data,
+                form.monthly_debts.data,
                 user_id
             ))
-
-        # If the profile does not exist, create a new row
         else:
             cursor.execute("""
                 INSERT INTO user_profiles (
@@ -68,24 +54,19 @@ def profile():
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 user_id,
-                annual_income,
-                credit_score,
-                employment_type,
-                monthly_expenses,
-                monthly_debts
+                form.annual_income.data,
+                form.credit_score.data,
+                form.employment_type.data,
+                form.monthly_expenses.data,
+                form.monthly_debts.data
             ))
 
         conn.commit()
         conn.close()
 
-        flash(
-            "Profile saved successfully. You can now calculate your mortgage.",
-            "success"
-        )
-
+        flash("Profile saved successfully.", "success")
         return redirect(url_for("dashboard"))
 
-    # If the user already has a profile, pre-fill the form with saved values
     if profile_data:
         form.annual_income.data = profile_data["annual_income"]
         form.credit_score.data = profile_data["credit_score"]
