@@ -65,7 +65,7 @@ def init_db():
             );
         """)
     
-        # Create banks table for eligibility matching
+    # Create banks table for eligibility matching
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS banks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,14 +78,21 @@ def init_db():
         );
     """)
 
-    # Seed default bank rules
+    # Seed realistic bank names with sample lending rules
     cursor.execute("""
-        INSERT OR IGNORE INTO banks
+        INSERT OR REPLACE INTO banks
         (id, name, max_income_multiple, max_ltv, min_income, accepted_employment_type, active)
         VALUES
-        (1, 'Bank A', 4.5, 90, 25000, 'employed', 1),
-        (2, 'Bank B', 5.0, 85, 30000, 'employed', 1),
-        (3, 'Bank C', 4.0, 95, 20000, 'self-employed', 1);
+        (1, 'HSBC', 4.5, 90, 25000, 'employed', 1),
+        (2, 'Barclays', 4.75, 85, 30000, 'employed', 1),
+        (3, 'Lloyds Bank', 4.5, 90, 22000, 'employed', 1),
+        (4, 'NatWest', 4.25, 85, 24000, 'employed', 1),
+        (5, 'Santander', 5.0, 80, 30000, 'employed', 1),
+        (6, 'Halifax', 4.5, 95, 20000, 'employed', 1),
+        (7, 'Nationwide', 4.75, 90, 25000, 'self-employed', 1),
+        (8, 'TSB', 4.0, 85, 21000, 'employed', 1),
+        (9, 'Virgin Money', 4.25, 90, 26000, 'self-employed', 1),
+        (10, 'Metro Bank', 4.0, 80, 23000, 'employed', 1);
     """)
 
     # Create eligibility results table
