@@ -1,19 +1,22 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_jwt_extended import create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from forms import RegisterForm, LoginForm
 from database import get_connection
 
+
 auth_bp = Blueprint("auth", __name__)
+
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     form = RegisterForm()
+
     if form.validate_on_submit():
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Hash password before storing
         password_hash = generate_password_hash(form.password.data)
 
         try:
@@ -22,10 +25,16 @@ def register():
                 (form.email.data, password_hash)
             )
             conn.commit()
+
             flash("Registration successful. Please log in.", "success")
-            return redirect(url_for("auth.login"))
+
+            return redirect(
+                url_for("auth.login", email=form.email.data)
+            )
+
         except Exception:
             flash("Email already registered.", "danger")
+
         finally:
             conn.close()
 
@@ -35,10 +44,22 @@ def register():
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
+
+    if request.method == "GET":
+        email = request.args.get("email")
+
+        if email:
+            form.email.data = email
+
     if form.validate_on_submit():
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = ?", (form.email.data,))
+
+        cursor.execute(
+            "SELECT * FROM users WHERE email = ?",
+            (form.email.data,)
+        )
+
         user = cursor.fetchone()
         conn.close()
 
@@ -51,12 +72,16 @@ def login():
             flash("Logged in successfully.", "success")
             return response
 
+        flash("Invalid credentials.", "danger")
+
     return render_template("login.html", form=form)
+
 
 @auth_bp.route("/logout")
 def logout():
     response = redirect(url_for("auth.login"))
     response.delete_cookie("access_token")
-    flash("Logged out successfully.", "success")
-    return response
 
+    flash("Logged out successfully.", "success")
+
+    return response

@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Mortgage Calculator{% endblock %}
+
+{% block content %}
+
+<style>
+    .calculator-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .calculator-hero {
+        background: linear-gradient(135deg, #eef4ff, #ffffff);
+        border: 1px solid #dfe8f8;
+        border-radius: 22px;
+        padding: 32px;
+        margin-bottom: 28px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+    }
+
+    .calculator-hero h2 {
+        margin: 0 0 10px 0;
+        color: #1f2d3d;
+    }
+
+    .calculator-hero p {
+        margin: 0;
+        color: #5f6b7a;
+        line-height: 1.6;
+    }
+
+    .calculator-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .calc-card {
+        background: #ffffff;
+        border: 1px solid #eeeeee;
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+    }
+
+    .calc-card h3 {
+        margin-top: 0;
+        margin-bottom: 18px;
+        color: #1f2d3d;
+    }
+
+    .profile-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 11px 0;
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    .profile-row:last-child {
+        border-bottom: none;
+    }
+
+    .profile-row strong {
+        color: #374151;
+    }
+
+    .profile-row span {
+        color: #4b5563;
+        text-align: right;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 7px;
+        color: #374151;
+    }
+
+    .input {
+        width: 100%;
+        padding: 11px;
+        border: 1px solid #cccccc;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    .error {
+        color: #b00020;
+        margin-top: 6px;
+        font-size: 0.9rem;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 24px;
+    }
+
+    @media (max-width: 800px) {
+        .calculator-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-row {
+            flex-direction: column;
+        }
+
+        .profile-row span {
+            text-align: left;
+        }
+    }
+</style>
+
+<div class="calculator-wrapper">
+
+    <section class="calculator-hero">
+        <h2>Mortgage Calculator</h2>
+        <p>
+            Enter your loan amount, interest rate, and mortgage term. The app will call the mortgage API,
+            save the result, and then show your latest affordability result on the dashboard.
+        </p>
+    </section>
+
+    <div class="calculator-grid">
+
+        <section class="calc-card">
+            <h3>Your Financial Profile</h3>
+
+            {% if profile_data %}
+                <div class="profile-row">
+                    <strong>Annual Income</strong>
+                    <span>£{{ "%.2f"|format(profile_data["annual_income"]) }}</span>
+                </div>
+
+                <div class="profile-row">
+                    <strong>Credit Score</strong>
+                    <span>{{ profile_data["credit_score"] }}</span>
+                </div>
+
+                <div class="profile-row">
+                    <strong>Employment Type</strong>
+                    <span>{{ profile_data["employment_type"] }}</span>
+                </div>
+
+                <div class="profile-row">
+                    <strong>Monthly Expenses</strong>
+                    <span>£{{ "%.2f"|format(profile_data["monthly_expenses"]) }}</span>
+                </div>
+
+                <div class="profile-row">
+                    <strong>Monthly Debts</strong>
+                    <span>£{{ "%.2f"|format(profile_data["monthly_debts"]) }}</span>
+                </div>
+
+                <br>
+                <a class="btn" href="{{ url_for('profile.profile') }}">Update Profile</a>
+            {% else %}
+                <p>No profile found. Please complete your profile first.</p>
+                <a class="btn" href="{{ url_for('profile.profile') }}">Complete Profile</a>
+            {% endif %}
+        </section>
+
+        <section class="calc-card">
+            <h3>Enter Mortgage Details</h3>
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    {{ form.amount.label }}
+                    {{ form.amount(class="input") }}
+
+                    {% for error in form.amount.errors %}
+                        <p class="error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.rate.label }}
+                    {{ form.rate(class="input") }}
+
+                    {% for error in form.rate.errors %}
+                        <p class="error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.term_years.label }}
+                    {{ form.term_years(class="input") }}
+
+                    {% for error in form.term_years.errors %}
+                        <p class="error">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                {{ form.submit(class="btn") }}
+            </form>
+        </section>
+
+    </div>
+
+    <a class="back-link" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+
+</div>
+
+{% endblock %}

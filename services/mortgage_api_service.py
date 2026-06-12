@@ -1,5 +1,5 @@
-#Service to use the API
 import requests
+
 from config import Config
 
 

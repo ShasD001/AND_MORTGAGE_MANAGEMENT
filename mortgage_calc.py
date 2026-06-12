@@ -1,5 +1,3 @@
-# Obtains and formats the mortgage API result
-
 from services.mortgage_api_service import (
     calculate_mortgage_payment,
     MortgageAPIError
@@ -7,16 +5,6 @@ from services.mortgage_api_service import (
 
 
 def get_api_repayment_result(amount, rate, term_years):
-    """
-    Calls the mortgage API service and extracts only the values needed
-    for the dashboard and database.
-
-    Returns:
-    - monthly repayment
-    - annual repayment
-    - total interest payable
-    """
-
     api_result = calculate_mortgage_payment(
         amount=amount,
         rate=rate,

@@ -2,204 +2,328 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h2>Your Dashboard</h2>
 
-<p>Welcome to A.N.D Mortgage Management.</p>
+<style>
+    .dashboard-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-<!-- Dashboard cards section -->
-<div class="dashboard-grid">
+    .dashboard-hero {
+        background: linear-gradient(135deg, #eef4ff, #ffffff);
+        border: 1px solid #dfe8f8;
+        border-radius: 22px;
+        padding: 32px;
+        margin-bottom: 28px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+    }
 
-    <div class="dash-card">
-        <h3>Financial Profile</h3>
-        <p>Create or update your income, credit score, employment type, expenses, and debts.</p>
-        <a class="btn" href="{{ url_for('profile.profile') }}">Manage Profile</a>
-    </div>
+    .dashboard-hero h2 {
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+        color: #1f2d3d;
+    }
 
-    <div class="dash-card">
-        <h3>Mortgage Calculator</h3>
-        <p>Enter loan amount, interest rate, and term to test the mortgage API and save the result.</p>
-        <a class="btn" href="#mortgage-test-form">Go to Calculator</a>
-    </div>
+    .dashboard-hero p {
+        margin: 0;
+        color: #5f6b7a;
+        line-height: 1.6;
+    }
 
-    <div class="dash-card">
-        <h3>Bank Eligibility Matching</h3>
-        <p>Compare your latest mortgage calculation against bank lending rules.</p>
-        <a class="btn" href="{{ url_for('eligibility') }}">Check Bank Eligibility</a>
-    </div>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
 
-    <div class="dash-card">
-        <h3>Saved Mortgage Applications</h3>
-        <p>This feature will be added in the dashboard/history epic.</p>
-    </div>
+    .dash-card,
+    .metric-card,
+    .result-card {
+        background: #ffffff;
+        border: 1px solid #eeeeee;
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.06);
+    }
 
-    <div class="dash-card">
-        <h3>Latest Mortgage Result</h3>
+    .dash-card h3,
+    .result-card h3 {
+        margin-top: 0;
+        color: #1f2d3d;
+    }
 
-        {% if latest_result %}
-            <p><strong>Status:</strong> {{ latest_result["affordability_status"] }}</p>
-            <p><strong>Monthly Repayment:</strong> £{{ "%.2f"|format(latest_result["monthly_repayment"]) }}</p>
-            <p><strong>Maximum Borrowing:</strong> £{{ "%.2f"|format(latest_result["max_borrowing"]) }}</p>
-        {% else %}
-            <p>No mortgage calculation found yet.</p>
-            <p>Please complete your profile first, then test the mortgage calculation below.</p>
-        {% endif %}
-    </div>
+    .dash-card p {
+        color: #5f6b7a;
+        line-height: 1.5;
+    }
 
-</div>
+    .status-pill {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #244a86;
+        font-weight: bold;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+    }
 
-<hr>
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 18px;
+        margin-bottom: 30px;
+    }
 
-<!-- Temporary mortgage API test form -->
-<section class="result-card" id="mortgage-test-form">
-    <h3>Mortgage Calculator Test Form</h3>
+    .metric-card small {
+        display: block;
+        color: #6b7280;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
 
-    <p>
-        Use this form to test whether the API calculation and database saving are working.
-    </p>
+    .metric-card strong {
+        font-size: 1.35rem;
+        color: #111827;
+    }
 
-    <form method="POST" action="{{ url_for('test_mortgage') }}">
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
 
-        <label>Loan Amount</label>
-        <input class="input" type="number" step="0.01" name="amount" required>
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 11px 0;
+        border-bottom: 1px solid #eeeeee;
+    }
 
-        <label>Interest Rate (%)</label>
-        <input class="input" type="number" step="0.01" name="rate" required>
+    .detail-row:last-child {
+        border-bottom: none;
+    }
 
-        <label>Mortgage Term in Years</label>
-        <input class="input" type="number" name="term_years" required>
+    .detail-row span {
+        text-align: right;
+        color: #4b5563;
+    }
 
-        <button class="btn" type="submit">Test API and Save Result</button>
+    .warning-box {
+        background: #fff8e6;
+        border: 1px solid #f0d48a;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 30px;
+        color: #5f4700;
+        line-height: 1.6;
+    }
 
-    </form>
-</section>
+    .empty-state {
+        background: #ffffff;
+        border: 1px dashed #bfc7d5;
+        border-radius: 18px;
+        padding: 36px;
+        text-align: center;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+    }
 
-<hr>
+    .muted {
+        color: #777777;
+    }
+</style>
 
-{% if latest_result %}
+<div class="dashboard-wrapper">
 
-<section class="result-card">
-    <h3>Database Result Found</h3>
-
-    <h4>User Profile Details from Database</h4>
-
-    <p><strong>Annual Income:</strong>
-        £{{ "%.2f"|format(latest_result["annual_income"]) }}
-    </p>
-
-    <p><strong>Credit Score:</strong>
-        {{ latest_result["credit_score"] }}
-    </p>
-
-    <p><strong>Employment Type:</strong>
-        {{ latest_result["employment_type"] }}
-    </p>
-
-    <p><strong>Monthly Expenses:</strong>
-        £{{ "%.2f"|format(latest_result["monthly_expenses"]) }}
-    </p>
-
-    <p><strong>Monthly Debts:</strong>
-        £{{ "%.2f"|format(latest_result["monthly_debts"]) }}
-    </p>
-</section>
-
-<section class="result-card">
-    <h4>Mortgage Details from Database</h4>
-
-    <p><strong>Loan Amount:</strong>
-        £{{ "%.2f"|format(latest_result["amount"]) }}
-    </p>
-
-    <p><strong>Interest Rate:</strong>
-        {{ "%.2f"|format(latest_result["rate"]) }}%
-    </p>
-
-    <p><strong>Mortgage Term:</strong>
-        {{ latest_result["term_years"] }} years
-    </p>
-</section>
-
-<section class="result-card">
-    <h4>API Repayment Results Saved in Database</h4>
-
-    <p><strong>Monthly Repayment:</strong>
-        £{{ "%.2f"|format(latest_result["monthly_repayment"]) }}
-    </p>
-
-    <p><strong>Annual Repayment:</strong>
-        £{{ "%.2f"|format(latest_result["annual_repayment"]) }}
-    </p>
-
-    <p><strong>Total Interest Payable:</strong>
-        £{{ "%.2f"|format(latest_result["total_interest_payable"]) }}
-    </p>
-</section>
-
-<section class="result-card">
-    <h4>SQL Calculations from database.py</h4>
-
-    <p><strong>Income Multiple Used:</strong>
-        {{ "%.2f"|format(latest_result["income_multiple"]) }}x
-    </p>
-
-    <p><strong>Maximum Borrowing:</strong>
-        £{{ "%.2f"|format(latest_result["max_borrowing"]) }}
-    </p>
-
-    <p><strong>Monthly Income:</strong>
-        £{{ "%.2f"|format(latest_result["monthly_income"]) }}
-    </p>
-
-    <p><strong>Monthly Disposable Income:</strong>
-        £{{ "%.2f"|format(latest_result["monthly_disposable_income"]) }}
-    </p>
-
-    <p><strong>Total Repayment:</strong>
-        £{{ "%.2f"|format(latest_result["total_repayment"]) }}
-    </p>
-
-    {% if latest_result["repayment_percentage"] is not none %}
-        <p><strong>Repayment Percentage:</strong>
-            {{ "%.2f"|format(latest_result["repayment_percentage"]) }}%
+    <section class="dashboard-hero">
+        <h2>Your Dashboard</h2>
+        <p>
+            Welcome to A.N.D Mortgage Management. Use this dashboard to manage your profile,
+            open the mortgage calculator, view your latest result, and check bank eligibility.
         </p>
+    </section>
+
+    <div class="dashboard-grid">
+
+        <div class="dash-card">
+            <h3>Financial Profile</h3>
+            <p>Create or update your income, credit score, employment type, expenses, and debts.</p>
+            <a class="btn" href="{{ url_for('profile.profile') }}">Manage Profile</a>
+        </div>
+
+        <div class="dash-card">
+            <h3>Mortgage Calculator</h3>
+
+            {% if latest_result %}
+                <p>Your mortgage calculation has already been completed. You can redo it if needed.</p>
+                <span class="status-pill">Calculation Complete</span>
+                <br>
+                <a class="btn" href="{{ url_for('mortgage.mortgage_calculator') }}">
+                    Redo Calculation
+                </a>
+            {% else %}
+                <p>Enter your loan amount, interest rate, and mortgage term.</p>
+                <a class="btn" href="{{ url_for('mortgage.mortgage_calculator') }}">
+                    Open Calculator
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="dash-card">
+            <h3>Bank Eligibility Matching</h3>
+            <p>Compare your latest mortgage calculation against bank lending rules.</p>
+
+            {% if latest_result %}
+                <a class="btn" href="{{ url_for('eligibility') }}">Check Eligibility</a>
+            {% else %}
+                <p class="muted">Complete a mortgage calculation first.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% if latest_result %}
+
+        <div class="summary-grid">
+
+            <div class="metric-card">
+                <small>Affordability Status</small>
+                <strong>{{ latest_result["affordability_status"] }}</strong>
+            </div>
+
+            <div class="metric-card">
+                <small>Monthly Repayment</small>
+                <strong>£{{ "%.2f"|format(latest_result["monthly_repayment"]) }}</strong>
+            </div>
+
+            <div class="metric-card">
+                <small>Maximum Borrowing</small>
+                <strong>£{{ "%.2f"|format(latest_result["max_borrowing"]) }}</strong>
+            </div>
+
+            <div class="metric-card">
+                <small>Monthly Disposable Income</small>
+                <strong>£{{ "%.2f"|format(latest_result["monthly_disposable_income"]) }}</strong>
+            </div>
+
+        </div>
+
+        <div class="details-grid">
+
+            <section class="result-card">
+                <h3>User Profile Used</h3>
+
+                <div class="detail-row">
+                    <strong>Annual Income</strong>
+                    <span>£{{ "%.2f"|format(latest_result["annual_income"]) }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Credit Score</strong>
+                    <span>{{ latest_result["credit_score"] }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Employment Type</strong>
+                    <span>{{ latest_result["employment_type"] }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Monthly Expenses</strong>
+                    <span>£{{ "%.2f"|format(latest_result["monthly_expenses"]) }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Monthly Debts</strong>
+                    <span>£{{ "%.2f"|format(latest_result["monthly_debts"]) }}</span>
+                </div>
+            </section>
+
+            <section class="result-card">
+                <h3>Mortgage Details</h3>
+
+                <div class="detail-row">
+                    <strong>Loan Amount</strong>
+                    <span>£{{ "%.2f"|format(latest_result["amount"]) }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Interest Rate</strong>
+                    <span>{{ "%.2f"|format(latest_result["rate"]) }}%</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Mortgage Term</strong>
+                    <span>{{ latest_result["term_years"] }} years</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Total Interest Payable</strong>
+                    <span>£{{ "%.2f"|format(latest_result["total_interest_payable"]) }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Total Repayment</strong>
+                    <span>£{{ "%.2f"|format(latest_result["total_repayment"]) }}</span>
+                </div>
+            </section>
+
+            <section class="result-card">
+                <h3>Affordability Breakdown</h3>
+
+                <div class="detail-row">
+                    <strong>Income Multiple Used</strong>
+                    <span>{{ "%.2f"|format(latest_result["income_multiple"]) }}x</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Monthly Income</strong>
+                    <span>£{{ "%.2f"|format(latest_result["monthly_income"]) }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Annual Repayment</strong>
+                    <span>£{{ "%.2f"|format(latest_result["annual_repayment"]) }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <strong>Repayment Percentage</strong>
+
+                    {% if latest_result["repayment_percentage"] is not none %}
+                        <span>{{ "%.2f"|format(latest_result["repayment_percentage"]) }}%</span>
+                    {% else %}
+                        <span>Not available</span>
+                    {% endif %}
+                </div>
+            </section>
+
+        </div>
+
+        <section class="warning-box">
+            <strong>Result Explanation</strong>
+            <p>{{ latest_result["warning_message"] }}</p>
+            <p><em>{{ latest_result["estimate_note"] }}</em></p>
+        </section>
+
     {% else %}
-        <p><strong>Repayment Percentage:</strong>
-            Not available
-        </p>
+
+        <section class="empty-state">
+            <h3>No Mortgage Calculation Yet</h3>
+
+            <p>
+                Complete your profile first, then open the mortgage calculator page
+                to enter your loan amount, interest rate, and mortgage term.
+            </p>
+
+            <a class="btn" href="{{ url_for('profile.profile') }}">Complete Profile</a>
+            <a class="btn" href="{{ url_for('mortgage.mortgage_calculator') }}">Open Calculator</a>
+        </section>
+
     {% endif %}
 
-    <p><strong>Affordability Status:</strong>
-        {{ latest_result["affordability_status"] }}
-    </p>
-
-    <p><strong>Warning:</strong>
-        {{ latest_result["warning_message"] }}
-    </p>
-
-    <p><em>{{ latest_result["estimate_note"] }}</em></p>
-</section>
-
-{% else %}
-
-<section class="result-card">
-    <h3>No Database Result Found Yet</h3>
-
-    <p>
-        The dashboard is connected to the database, but the SQL query has not found
-        a complete mortgage result for this user yet.
-    </p>
-
-    <p>To test it:</p>
-
-    <ol>
-        <li>Complete your profile first using the Manage Profile button.</li>
-        <li>Return to the dashboard.</li>
-        <li>Enter loan amount, interest rate, and term in the test form.</li>
-        <li>Submit the form.</li>
-        <li>The result should appear here.</li>
-    </ol>
-</section>
-
-{% endif %}
+</div>
 
 {% endblock %}

@@ -12,6 +12,7 @@ profile_bp = Blueprint("profile", __name__)
 @jwt_required()
 def profile():
     user_id = int(get_jwt_identity())
+
     form = ProfileForm()
 
     conn = get_connection()
@@ -21,9 +22,16 @@ def profile():
         "SELECT * FROM user_profiles WHERE user_id = ?",
         (user_id,)
     )
+
     profile_data = cursor.fetchone()
 
     if form.validate_on_submit():
+        annual_income = float(form.annual_income.data)
+        credit_score = int(form.credit_score.data)
+        employment_type = form.employment_type.data
+        monthly_expenses = float(form.monthly_expenses.data)
+        monthly_debts = float(form.monthly_debts.data)
+
         if profile_data:
             cursor.execute("""
                 UPDATE user_profiles
@@ -34,13 +42,14 @@ def profile():
                     monthly_debts = ?
                 WHERE user_id = ?
             """, (
-                form.annual_income.data,
-                form.credit_score.data,
-                form.employment_type.data,
-                form.monthly_expenses.data,
-                form.monthly_debts.data,
+                annual_income,
+                credit_score,
+                employment_type,
+                monthly_expenses,
+                monthly_debts,
                 user_id
             ))
+
         else:
             cursor.execute("""
                 INSERT INTO user_profiles (
@@ -54,17 +63,21 @@ def profile():
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 user_id,
-                form.annual_income.data,
-                form.credit_score.data,
-                form.employment_type.data,
-                form.monthly_expenses.data,
-                form.monthly_debts.data
+                annual_income,
+                credit_score,
+                employment_type,
+                monthly_expenses,
+                monthly_debts
             ))
 
         conn.commit()
         conn.close()
 
-        flash("Profile saved successfully.", "success")
+        flash(
+            "Profile saved successfully. You can now calculate your mortgage.",
+            "success"
+        )
+
         return redirect(url_for("dashboard"))
 
     if profile_data:

@@ -2,6 +2,16 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<h1>Welcome to the Mortgage App</h1>
-<p>Your one‑stop tool for comparing mortgage rates and calculating payments.</p>
+<h1>Welcome to A.N.D Mortgage Management</h1>
+<p>Your one-stop tool for checking mortgage affordability, repayments, and bank eligibility.</p>
+
+{% if not request.cookies.get("access_token") %}
+    <p>Please register or log in to access your dashboard and mortgage features.</p>
+    <div class="home-buttons">
+        <a class="btn" href="{{ url_for('auth.register') }}">Register</a>
+        <a class="btn" href="{{ url_for('auth.login') }}">Login</a>
+    </div>
+{% else %}
+    <a class="btn" href="{{ url_for('dashboard') }}">Go to Dashboard</a>
+{% endif %}
 {% endblock %}
