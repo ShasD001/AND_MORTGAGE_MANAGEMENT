@@ -57,7 +57,7 @@ def login():
         if email:
             form.email.data = email
 
-    if form.validate_on_submit():
+    if form.validate_on_submit(): 
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
